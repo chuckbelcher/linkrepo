@@ -1,23 +1,40 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useState } from 'react';
+import LinkList from './components/LinkList';
+import LinkForm from './components/LinkForm';
+//Grab all links
+
+//Display all links
+
+//Delete and Archive Links
+
 
 function App() {
+
+  const [ links, setLinks ] = useState([])
+
+  const loadLinks = async () => {
+    try {
+      const res = await fetch('/.netlify/functions/getLinks');
+      const links = await res.json();
+      setLinks(links);
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  useEffect(() => {
+    loadLinks();
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="container py-5">
+      <h1 className="text-center mb-5">List 0' Links</h1>
+      <div className="container">
+        <LinkForm refreshLinks={loadLinks} />
+      </div>
+      <div className="container mt-5">
+        <LinkList links={links} refreshLinks={loadLinks} />
+      </div>
     </div>
   );
 }

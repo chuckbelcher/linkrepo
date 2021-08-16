@@ -1,34 +1,17 @@
 const axios = require('axios');
 require('dotenv').config();
-exports.handler = async (event) => {
-    const GET_LINKS = `
-        query {
-            allLinks {
-                data {
-                    name
-                    _id
-                    url
-                    description
-                    archived
-                }
-            }
-        }`;
-        
-    const {data} = await axios({
-        url: 'https://graphql.us.fauna.com/graphql',
-        method: 'POST',
-        headers: {
-            Authorization: `Bearer ${process.env.FAUNA_SECRET_KEY}`,
-        },
-        data: {
-            query: GET_LINKS,
-            variables: {}
-        }
-    });
+const { GET_LINKS } = require('./utils/linkQueries');
+const sendQuery = require('./utils/sendQuery');
+const formattedResponse = require('./utils/formattedResponse');
 
-    return {
-        statusCode: 200,
-        body: JSON.stringify(data)
+exports.handler = async (event) => {
+    try {
+        const res = await sendQuery(GET_LINKS);
+        const data = res.allLinks.data;
+        return formattedResponse(200, data);
+    } catch (err) {
+        console.error(err);
+        return formattedResponse(500, {ERROR: 'Something went bad dude'})
     }
 }
 
